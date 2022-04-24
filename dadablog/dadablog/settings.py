@@ -120,7 +120,6 @@ TIME_ZONE = 'Asia/Shanghai'
 USE_I18N = True
 
 USE_L10N = True
-
 # 关闭时区功能后，数据库存储时间时，按照TIME_ZONE时区进行存储
 USE_TZ = False
 
