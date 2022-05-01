@@ -36,7 +36,7 @@ A ny individuals and organizations and not for commercial use, professiona websi
 
         <li>
             <input type="phone" class="phone" name="phone" placeholder="请输手机号" required/>
-            <input type="button" id="sms" onclick="settime(this)" value="免费获取验证码">
+            <input type="button" id="sms" onclick="sendSMS();settime(this)" value="免费获取验证码">
             <div class="clear"></div>
         </li>
         <li>
@@ -102,12 +102,14 @@ A ny individuals and organizations and not for commercial use, professiona websi
         var password_1 = $('.password_1').val();
         var password_2 = $('.password_2').val();
         var phone = $('.phone').val();
+        var sms_num = $('.sms_num').val();
         var post_data = {
             "username": username,
             "email": email,
             "password_1": password_1,
             "password_2": password_2,
-            "phone": phone
+            "phone": phone,
+            "sms_num": sms_num
         };
 
         $.ajax({
@@ -124,6 +126,29 @@ A ny individuals and organizations and not for commercial use, professiona websi
                 }
             }
         })
+    }
+
+    function sendSMS() {
+
+        var phone = $('.phone').val();
+        var post_data = {"phone": phone};
+        $.ajax({
+            type: "post",
+            contentType: "application/json",
+            dataType: "json",
+            url: "http://127.0.0.1:8000/v1/users/sms",
+            data: JSON.stringify(post_data),
+            success: function (result) {
+                if (result.code == 200) {
+                    alert("短信已发送，请注意查收")
+                } else {
+                    // alert("短信服务异常，请稍后再试")
+                    alert(result.error)
+                }
+
+            }
+        })
+
     }
 
 </script>
