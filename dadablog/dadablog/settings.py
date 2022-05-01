@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'corsheaders',
     'user',
+    'dtoken',
 ]
 
 MIDDLEWARE = [
@@ -157,3 +158,5 @@ CORS_ALLOW_HEADERS = (
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+JWT_TOKEN_KEY = '123456'
