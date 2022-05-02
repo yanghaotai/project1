@@ -10,6 +10,7 @@ import hashlib
 from tools.logging_dec import logging_check
 from django.core.cache import cache
 from tools.sms import YunTongXin
+from .task import send_sms_c
 
 
 # 异常码 10100-10199
@@ -143,7 +144,9 @@ def sms_view(requset):
 
     cache.set(cache_key, code, 60 * 3)
     # 发送随机码->短信
-    send_sms(phone, code)
+    # send_sms(phone, code)
+    # celery版
+    send_sms_c.delay(phone, code)
     return JsonResponse({'code': 200})
 
 
