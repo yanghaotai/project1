@@ -5,8 +5,10 @@ from django.shortcuts import render
 from django.views import View
 from django.utils.decorators import method_decorator
 from tools.logging_dec import logging_check, get_user_by_request
+from tools.cache_dec import cache_set
 from topic.models import Topic
 from user.models import UserProfile
+from django.core.cache import cache
 
 
 # 异常码 10300-10399
@@ -14,6 +16,18 @@ from user.models import UserProfile
 
 
 class TopicViews(View):
+
+    def clear_topics_caches(self, request):
+
+        path = request.path_info
+        cache_key_p = ['topics_cache_self_', 'topics_cache_']
+        cache_key_h = ['', '?category=tec', '?category=no-tec']
+        all_keys = []
+        for key_p in cache_key_p:
+            for key_h in cache_key_h:
+                all_keys.append(key_p + path + key_h)
+        print('clear caches is', all_keys)
+        cache.delete_many(all_keys)
 
     def make_topic_res(self, author, author_topic, is_self):
 
@@ -85,9 +99,14 @@ class TopicViews(View):
         Topic.objects.create(title=title, content=content, limit=limit, category=category, introduce=introduce,
                              author=author)
 
+        # 删除缓存
+        self.clear_topics_caches(request)
+
         return JsonResponse({'code': 200})
 
+    @method_decorator(cache_set(120))
     def get(self, requset, author_id):
+        print('----view--in----')
         # /v1/topics/guoxiaonao
         # 访问者 visitor
         # 当前被访问博客的博主 author
