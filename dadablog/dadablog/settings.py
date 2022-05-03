@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'user',
     'dtoken',
     'topic',
+    'message',
 ]
 
 MIDDLEWARE = [

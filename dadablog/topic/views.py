@@ -8,6 +8,7 @@ from tools.logging_dec import logging_check, get_user_by_request
 from tools.cache_dec import cache_set
 from topic.models import Topic
 from user.models import UserProfile
+from message.models import Message
 from django.core.cache import cache
 
 
@@ -44,6 +45,32 @@ class TopicViews(View):
         last_id = last_topic.id if last_topic else None
         last_title = last_topic.title if last_topic else ''
 
+        # 关联留言和回复
+        all_messages = Message.objects.filter(topic=author_topic).order_by('-created_time')
+
+        msg_list = []
+        rep_dic = {}
+        m_count = 0
+        for msg in all_messages:
+            if msg.parent_message:
+                # 回复
+                rep_dic.setdefault(msg.parent_message, [])
+                rep_dic[msg.parent_message].append({'msg_id': msg.id, 'publisher': msg.publisher.nickname,
+                                                    'publisher_avatar': str(msg.publisher.avatar),
+                                                    'content': msg.content,
+                                                    'created_time': msg.created_time.strftime('%Y-%m-%d %H:%M:%S')})
+
+            else:
+                # 留言
+                m_count += 1
+                msg_list.append({'id': msg.id, 'content': msg.content, 'publisher': msg.publisher.nickname,
+                                 'publisher_avatar': str(msg.publisher.avatar),
+                                 'created_time': msg.created_time.strftime('%Y-%m-%d %H:%M:%S'), 'reply': []})
+
+        for m in msg_list:
+            if m['id'] in rep_dic:
+                m['reply'] = rep_dic[m['id']]
+
         res = {'code': 200, 'data': {}}
         res['data']['nickname'] = author.nickname
         res['data']['title'] = author_topic.title
@@ -56,8 +83,8 @@ class TopicViews(View):
         res['data']['last_title'] = last_title
         res['data']['next_id'] = next_id
         res['data']['next_title'] = next_title
-        res['data']['messages'] = []
-        res['data']['messages_count'] = 0
+        res['data']['messages'] = msg_list
+        res['data']['messages_count'] = m_count
         return res
 
     def make_topics_res(self, author, author_topics):
